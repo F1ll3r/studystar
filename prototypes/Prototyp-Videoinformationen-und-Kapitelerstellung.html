@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+
+
+    <!--Aktuelle JQUERY Bibliothek einbinden-->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js" type="text/javascript"></script>
+    <script src="scripts/LinkErkennung.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+
+        function youtubeDataCallback(data) {
+
+            //Erhaltene Daten aufbereiten
+            var s = '';
+            s += '<img src="' + data.entry.media$group.media$thumbnail[1].url
+                    + '" width="' + data.entry.media$group.media$thumbnail[1].width
+                    + '" height="' + data.entry.media$group.media$thumbnail[1].height
+                    + '" alt="' + data.entry.media$group.media$thumbnail[1].yt$name + '" align="right"/>';
+            s += '<b>Titel:</b> ' + data.entry.title.$t + '<br/>';
+            s += '<b>Author:</b> ' + '<a href="http://www.youtube.com/user/' + data.entry.author[0].name.$t
+                    + '" target="_blank">' + data.entry.author[0].name.$t + '</a><br/>';
+            s += '<b>Veroeffentlicht am:</b> ' + new Date(data.entry.published.$t).toLocaleDateString() + '<br/>';
+            s += '<b>Dauer:</b> ' + Math.floor(data.entry.media$group.yt$duration.seconds / 60) + ':' + (data.entry.media$group.yt$duration.seconds % 60) + ' (' + data.entry.media$group.yt$duration.seconds + ' Sekunden)<br/>';
+            if (data.entry.gd$rating) {
+                s += '<b>Bewertung:</b> ' + data.entry.gd$rating.average.toFixed(1) + ' von ' + data.entry.gd$rating.max + ' Sternen ' + ' (' + data.entry.gd$rating.numRaters + ' Bewertungen)<br/>';
+            }
+            s += '<b>Likes: </b> ' + data.entry.yt$rating.numLikes + '<br/>';
+            s += '<b>Dislikes: </b> ' + data.entry.yt$rating.numDislikes + '<br/>';
+            s += '<b>Favoriten: </b> ' + data.entry.yt$statistics.favoriteCount + '<br/>';
+            s += '<b>Aufrufe: </b>' + data.entry.yt$statistics.viewCount + '<br/>';
+            s += '<b>Beschreibung: </b>' + '<br/>';
+            s += '<br/>' + addHTMLExpressionToDeeplink(addHTMLExpressionToHyperlink(data.entry.media$group.media$description.$t.replace(/\n/g, '<br/>'))) + '<br/>';
+            s += '<br/></div><a href="' + data.entry.media$group.media$player.url + '" target="_blank">Auf Youtube ansehen</a>';
+            //Schreibe werte auf bestimmte Output stelle
+            $('#youtubeDataOutput').html(s);
+
+            createChapterView(getDeeplinkChaptersinDescription(data.entry.media$group.media$description.$t), data);
+
+        }
+
+
+        $(document).ready(function() {
+            $('#youtubeDataQuery').submit(function(e) {
+                e.preventDefault();
+
+                var videoid = $('#youtubeVideoId').val();
+                var m;
+                if (m = videoid.match(/^http:\/\/www\.youtube\.com\/.*[?&]v=([^&]+)/i) || videoid.match(/^http:\/\/youtu\.be\/([^?]+)/i)) {
+                    videoid = m[1];
+                }
+                if (!videoid.match(/^[a-z0-9_-]{11}$/i)) {
+                    alert('Unable to parse Video ID/URL.');
+                    return;
+                }
+                $.getScript('http://gdata.youtube.com/feeds/api/videos/' + encodeURIComponent(videoid) + '?v=2&alt=json-in-script&callback=youtubeDataCallback');
+            });
+        });
+
+        //Funktion erstellt eine Kapitelübersicht
+        function createChapterView(chapters, data) {
+
+            var str = '<ul id="chapters-list" class="video-list">';
+
+            var pictures = [];
+
+            //Zeiten erhalten
+            for (var z = 0; z< data.entry.media$group.media$thumbnail.length; z++) {
+                var picture = new Object();
+                picture.url = data.entry.media$group.media$thumbnail[z].url;
+                picture.width = data.entry.media$group.media$thumbnail[z].width;
+                picture.height = data.entry.media$group.media$thumbnail[z].height;
+                picture.name = data.entry.media$group.media$thumbnail[z].yt$name;
+                picture.time = data.entry.media$group.media$thumbnail[z].time;
+                if(picture.time) {
+                    //milisekunden entfernen
+                    picture.time = picture.time.substr(0,data.entry.media$group.media$thumbnail[z].time.length-4);
+
+                    //Als mögliches Vorschaubild hinufügen
+                    pictures.push(picture);
+                }
+            }
+
+            for (var i = 0; i < chapters.deeplinks.length; i++) {
+
+                //Zeitlich passendes Thumbnail-Bild auswählen
+                var selectedPic;
+                if(getSecondsFromDeeplinkTimestamp(chapters.deeplinks[i]) <= getSecondsFromDeeplinkTimestamp(pictures[1].time)) {
+                    selectedPic = 0;
+                } else {
+                    if(getSecondsFromDeeplinkTimestamp(chapters.deeplinks[i]) > getSecondsFromDeeplinkTimestamp(pictures[1].time)
+                            && getSecondsFromDeeplinkTimestamp(chapters.deeplinks[i]) <= getSecondsFromDeeplinkTimestamp(pictures[2].time)) {
+                        selectedPic = 1;
+                    } else {
+                        if(getSecondsFromDeeplinkTimestamp(chapters.deeplinks[i]) > getSecondsFromDeeplinkTimestamp(pictures[2].time)
+                                && getSecondsFromDeeplinkTimestamp(chapters.deeplinks[i]) <= getSecondsFromDeeplinkTimestamp(pictures[3].time)) {
+                            selectedPic = 2;
+                        } else {
+                            selectedPic = 3;
+                        }
+                    }
+                }
+
+                //HTML-Codestring generieren
+                str +=  '<li class="chapter-item">';
+                str     += '<a href="'+ $('#youtubeVideoId').val();
+                str             += "&feature=related#t=" + getSecondsFromDeeplinkTimestamp(chapters.deeplinks[i])+ '">';
+                str     += '<tr>';
+                str     += '<span class="chapter-image">';
+                str        += '<img src="' + pictures[selectedPic].url;
+                str        +='" width="' + pictures[selectedPic].width;
+                str        += '" height="' + pictures[selectedPic].height;
+                str        += '" alt="' + pictures[selectedPic].name + '" align="right"/>';
+                str     += '</span>';
+                str     += '<span class="chapter-linktime">';
+                str         += '<a href="'  + $('#youtubeVideoId').val();
+                str             += "&feature=related#t=" + getSecondsFromDeeplinkTimestamp(chapters.deeplinks[i]);
+                str             += 's" target="_blank">' + chapters.deeplinks[i] + '</a>  ';
+                str     += '</span>';
+                str     += '<span class="chapter-title">';
+                str         += chapters.descriptions[i];
+                str     += '</span>';
+                str     += '</tr>';
+                str     += '</a>';
+                str += '</li>';
+            }
+
+            str += '</ul>';
+            //Schreibe HTML-Code auf bestimmte Outputstelle
+            $('#chapterOutput').html(str);
+        }
+    </script>
+
+
+</head>
+
+<body>
+
+<style type="text/css">
+
+    #chapterOutput {
+        TEXT-ALIGN: left; MARGIN-TOP: 0px; WIDTH: 380px
+    }
+    .chapter-item {
+        PADDING-BOTTOM: 5px; WIDTH: 380px; FLOAT: right
+    }
+    .chapter-image {
+        PADDING-BOTTOM: 5px; FLOAT: left
+    }
+    .chapter-linktime {
+        PADDING-BOTTOM: 10px; FLOAT: right
+    }
+    .chapter-title {
+        PADDING-BOTTOM: 10px; FLOAT: right
+    }
+</style>
+
+    <div class="youtube-videoinformationen">
+        <form id="youtubeDataQuery" action="#" >
+            <div>
+                <b>Geben Sie eine Youtube Video URL in die Textbox ein:</b>
+                <br/>
+                <input id="youtubeVideoId" type="text" maxlength="200" value="" style="width: 70%;"></input>
+                <input type="submit" value="Informationen ausgeben" style="width: 28%;"></input>
+            </div>
+            <br/>
+            <div id="youtubeDataOutput">
+
+                In diesem Bereich werden die Videoinformationen erscheinen...
+
+            </div>
+            <br/>
+            <br/>
+            <h2>Kapiteluebersicht</h2>
+            <div id="chapterOutput">
+
+                In diesem Bereich wird eine Kapiteluebersicht erscheinen...
+
+            </div>
+
+        </form>
+    </div>
+
+</body>
+</html>

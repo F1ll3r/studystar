@@ -1,0 +1,27 @@
+#mainframe {
+    margin: 0px auto;
+}
+
+#mainframe {
+    margin: 0px auto;
+    width: 600px;
+}
+
+#maincontent {
+    margin: 0px auto;
+    width: 600px;
+    border: solid;
+    border-width: 1px;
+    border-color: #d3d3d3;
+    padding: 10px;
+    font: normal normal normal 13px/15px arial, sans-serif;
+}
+
+a {
+    text-decoration:none
+}
+
+#pagehead {
+    width: 500px;
+    margin: 0px auto;
+}

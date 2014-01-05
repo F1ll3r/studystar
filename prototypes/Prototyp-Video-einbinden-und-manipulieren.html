@@ -1,0 +1,178 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>YouTube Player API Sample</title>
+    <style type="text/css">
+      #videoDiv { 
+        margin-right: 3px;
+      }
+      #videoInfo {
+        margin-left: 3px;
+      }
+    </style>
+	   <!-- Zugriff auf Google Javascrpit API  -->
+    <script src="//www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+	   <!-- Zum Laden des Players -->
+      google.load("swfobject", "2.1");
+    </script>    
+    <script type="text/javascript">
+      /*
+       * Chromeless player has no controls.
+       **/ 
+	  // Aktualisieren einer bestimmten HTML-Elements mit einem neuen Wert
+	  // generiert den Text der angezeigt wird
+      function updateHTML(elmId, value) {
+        document.getElementById(elmId).innerHTML = value;
+      }
+      
+	  // Errorcode, bei Fehlern
+      function onPlayerError(errorCode) {
+        alert("An error occured of type:" + errorCode);
+      }
+      
+	  // zeigt Spielerstatus aus der API an, wenn er zB seine Zustand ändert
+      function onPlayerStateChange(newState) {
+        updateHTML("playerState", newState);
+      }
+      
+	 
+      // Informationen über den aktuellen Zustand des Spielers
+      function updatePlayerInfo() {
+	  
+		// ytplayer = Instanz, holt die Daten aus der API
+        if(ytplayer && ytplayer.getDuration) {
+          updateHTML("videoDuration", Math.round(ytplayer.getDuration()));
+          updateHTML("videoCurrentTime", ytplayer.getCurrentTime());
+          updateHTML("bytesTotal", ytplayer.getVideoBytesTotal());
+          updateHTML("startBytes", ytplayer.getVideoStartBytes());
+          updateHTML("bytesLoaded", ytplayer.getVideoBytesLoaded());
+          updateHTML("volume", ytplayer.getVolume());
+        }
+      }
+      
+ 
+	  // Lautstärke kann von 0-100 einstellen
+      function setVideoVolume() {
+        var volume = parseInt(document.getElementById("volumeSetting").value);
+        if(isNaN(volume) || volume < 0 || volume > 100) {
+          alert("Please enter a valid volume between 0 and 100.");
+        }
+		// ist der Player aktiv
+        else if(ytplayer){
+          ytplayer.setVolume(volume);
+        }
+      }
+      
+      function playVideo() {
+        if (ytplayer) {
+          ytplayer.playVideo();
+        }
+      }
+      
+      function pauseVideo() {
+        if (ytplayer) {
+          ytplayer.pauseVideo();
+        }
+      }
+      
+      function muteVideo() {
+        if(ytplayer) {
+          ytplayer.mute();
+        }
+      }
+      
+      function unMuteVideo() {
+        if(ytplayer) {
+          ytplayer.unMute();
+        }
+      }
+	  
+	  // holt die URL
+	  // URL wird zerteilt bis zu VideoId (v=)
+	   function setNewVideo() {
+	   var url = document.getElementById("videoLink").value;
+	   if(ytplayer) {
+	   var video_id = url.split('v=')[1];
+		var ampersandPosition = video_id.indexOf('&');
+		if(ampersandPosition != -1) {
+		video_id = video_id.substring(0, ampersandPosition);
+	}
+		    ytplayer.loadVideoById(video_id);
+
+	  }
+}
+ 
+      /*
+	  * die Minuten und Sekunden werden geholt
+	  * Minuten werden in Sekunden berechnet + Sekunden 
+	  * Gesamtdauer vom Video wird geholt und man fragt ob das eingegeben kleiner als das gesamte Video ist.
+	  * Wird in die eingegebene Zeit gesprungen und fals die eingegebene Zeit zu groß ist wird ein Fehler ausgegeben
+	  */
+	   function setVideoTime() {
+	    var minute = parseInt(document.getElementById("minuteSetting").value);
+		var second = parseInt(document.getElementById("secondSetting").value);
+		var time = minute*60 + second;
+		if(ytplayer) {
+		var duration = parseInt(ytplayer.getDuration());
+		if(time < duration) {
+			ytplayer.seekTo(time, true);
+		} else {
+				alert(" Die eingegebene Zahl ist zu groß");
+		}
+		}
+	   }
+	   
+      
+      // Diese Funktion wird vom Player automatisch aufgerufen, sobald es lädt
+      function onYouTubePlayerReady(playerId) {
+        ytplayer = document.getElementById("ytPlayer");
+
+		// Jede viertel Sekunde wird die Zeit aktualisiert
+        setInterval(updatePlayerInfo, 250);
+        updatePlayerInfo();
+        ytplayer.addEventListener("onStateChange", "onPlayerStateChange");
+        ytplayer.addEventListener("onError", "onPlayerError");
+		// Läd das erste Video in den Player
+        ytplayer.cueVideoById("ylLzyHk54Z0");
+      }
+      
+      // Läuft wenn es ausgeführt wird 
+	  // Player wird konfiguriert und das erste Video wird gesetzt
+      function loadPlayer() {
+        // Lets Flash from another domain call JavaScript
+        var params = { allowScriptAccess: "always" };
+        // The element id of the Flash embed
+        var atts = { id: "ytPlayer" };
+        // All of the magic handled by SWFObject (http://code.google.com/p/swfobject/)
+        swfobject.embedSWF("http://www.youtube.com/apiplayer?" +
+                           "version=3&enablejsapi=1&playerapiid=player1", 
+                           "videoDiv", "480", "295", "9", null, null, params, atts);
+      }
+      function _run() {
+        loadPlayer();
+      }
+      google.setOnLoadCallback(_run);
+    </script>
+  </head>
+  <body style="font-family: Arial;border: 0 none;">
+    <table>
+    <tr>
+    <td><div id="videoDiv">Loading...</div></td>
+    <td valign="top">
+      <div id="videoInfo">
+        <p> Videostatus: <span id="playerState">--</span></p>
+        <p>Aktuelle Zeit: <span id="videoCurrentTime">--:--</span> | Dauer: <span id="videoDuration">--:--</span></p>
+        <p>Bytes insgesamt: <span id="bytesTotal">--</span> | Start Bytes: <span id="startBytes">--</span> | Geladene Bytes : <span id="bytesLoaded">--</span></p>
+        <p>Kontrollen: <a href="javascript:void(0);" onclick="playVideo();">Abspielen</a> | <a href="javascript:void(0);" onclick="pauseVideo();">Pause</a> | <a href="javascript:void(0);" onclick="muteVideo();">Ton aus</a> | <a href="javascript:void(0);" onclick="unMuteVideo();">Ton an</a></p>
+        <p><input id="volumeSetting" type="text" size="3" />&nbsp;<a href="javascript:void(0)" onclick="setVideoVolume();">&lt;- Lautstärke setzen</a> | Lautstärke : <span id="volume">--</span></p>
+		<p><input id="minuteSetting" type="text" size="3" />:<input id="secondSetting" type="text" size="3" />&nbsp;<a href="javascript:void(0)" onclick="setVideoTime();">&lt;- Zeitangabe</a></p>
+		<p><input id="videoLink" type="text" />&nbsp;<a href="javascript:void(0)" onclick="setNewVideo();">&lt;- Video laden</a></p>
+
+      </div>
+    </td></tr>
+    </table>
+  </body>
+</html>

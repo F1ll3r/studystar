@@ -1,0 +1,362 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>studystar</title>
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/watch.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/informationsLeiste.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/videoInformationen.css">
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js" type="text/javascript"></script>
+    <script src="//www.google.com/jsapi" type="text/javascript"></script>
+
+    <script type="text/javascript" src="scripts/formatierer.js"></script>
+    <script type="text/javascript" src="scripts/parameterErkennung.js"></script>
+    <script type="text/javascript">
+        //Browser API Key
+        var SERVER_API_KEY = "AIzaSyCHBE8yE_5M_xFj9fP5aZCEL1WIn5TFMBE";
+
+        //Variable hält die Informationen des derzeig eingeloggten Google+ Benutzers
+        var currentUser;
+
+        //Videoparameter erkennen
+        var key = 'v';
+        var videoID = getParameter(key);
+
+        //Videolänge global deklarieren (wird beim erhalten der videoinformationen auf korekten wert gesetzt
+        var videoLength = 1;
+
+        var isLoggedIn = false;
+
+        var accessToken;
+
+        //Array das die Objekte der Informationsleiste beinhaltet
+        var infObjects = [];
+
+        //Array das alle unzuordenbare Kommentare beinhaltet
+        var generalCommentObjects = [];
+
+        //Position des Pointers auf der Inormationsleiste
+        var currentPointerPosition = 0;
+
+        //Gecachte Position des Pointers auf der Inormationsleiste
+        var cashedPointerPosition = 0;
+
+        //Gecachten Kommentarinhalt für Hover Vorschaufunktion
+        var commentPreviewCache = "";
+
+        //Vorschaumodus
+        var previewMode = false;
+
+    </script>
+
+    <script src="scripts/youtubePlayer.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        //Laden des Players
+        google.load("swfobject", "2.1");
+
+    </script>
+
+    <script src="scripts/LinkErkennung.js" type="text/javascript"></script>
+
+    <script type="text/javascript" src="scripts/informationsleiste.js"></script>
+    <script type="text/javascript" src="scripts/videoInformationenUndKapitel.js"></script>
+    <script type="text/javascript" src="scripts/comments.js"></script>
+    <script type="text/javascript" src="scripts/login.js"></script>
+    <script type="text/javascript" src="scripts/autogrowTextarea.js"></script>
+    <script type="text/javascript" src="scripts/googleAnalytics.js"></script>
+
+</head>
+<body>
+
+<div class="pagehead">
+    <span id="studystarLogo">
+                    <img src="img/Banner2_studystar_small_transparent_kompressed.png" alt="studystar" class="banner-img"
+                         onclick="location.href='Youtube-Suche.html';return false;" target="_self" style="cursor: pointer;">
+    </span>
+    <span id="hhnLogo">
+                    <img src="img/logo-hhn-small.png" alt="HHN" id="hhnLogo-banner" height="30px"
+                         onclick="location.href='http://www.hs-heilbronn.de/seb';return false;" target="_blank" style="cursor: pointer;">
+    </span>
+    <span class="title" id="title"></span>
+
+    <span id="studystarUser">
+            <span id="userName"></span>
+            <span id="userPicture"></span>
+        <img name="Logout" type="image" id="logoutButton" src="img/logout.png" alt="Benutzer abmelden"
+             class="googleLogout" value="Logout" onclick="logout();">
+    </span>
+
+    <img name="Login" type="image" id="loginButton" src="img/sign-in-with-google.png" alt="Mit Google anmelden"
+              class="googleLogin" value="Login" onclick="login();">
+
+
+    <script>
+        checkLogin();
+    </script>
+
+</div>
+
+       <div class="mainframe">
+
+           <table class="mainTable" width="800" height="500" >
+               <tr>
+                   <td class="mainTableParts">
+                       <div class="centerframe">
+                           <table class="centerframeTable" cellspacing="0px" margin="0px"
+                                  cellpadding="0" border-collapse="collapse" border-spacing="0">
+                               <tr>
+                                   <div class="embeddedVideo" id="videoDiv">
+                                   </div>
+                               </tr>
+                               <tr>
+                                   <td>
+                                   <div class="informationBar">
+
+                                       <script>
+                                           $(document).ready(function () {
+
+
+                                               //Textfield die Autogrow Eigenschaft zuweisen
+                                               $('#newCommentTextField').autogrow();
+
+                                               //Automatischer aufruf jede Sekunde
+                                               setInterval(updateBar, 1000);
+
+                                               //Berechnen aktueller Prozentsatz dess Videos.
+                                               function updateBar(event, ui) {
+                                                   if(ytplayer != undefined) {
+                                                       now =  ytplayer.getCurrentTime();
+                                                       end = ytplayer.getDuration();
+                                                       var time = Math.round((now / end)*100);
+
+                                                       //Automatisches Aufpoppen von Kommentaren zur Zeitstelle
+                                                       autoPopupInformationObject(Math.round(now));
+
+                                                       //Aktuellen Zeitpunkt via Breite der Zeitpunktmarkierung anzeigen
+
+                                                       if(time < 1) {
+                                                           $("#preInfBar").css("background-color", "white");
+                                                       } else {
+                                                           if(time >= 1) {
+                                                           $("#preInfBar").css("background-color", "#eed9d9");
+                                                           $("#postInfBar").css("background-color", "white");
+                                                               if(time == 100) {
+                                                                   $("#postInfBar").css("background-color", "#eed9d9");
+                                                               }
+                                                           }
+                                                       }
+                                                       $("#Zeitpunktmarkierung").css("width", time + "%");
+                                                   }
+                                               }
+
+                                               /**
+                                                * Klick auf informationsleiste
+                                                */
+                                               $('#infBar').dblclick(function (event, ui) {
+                                                   //X-Achsen position der Maus auf der Informationsleiste
+                                                   var mausPositionX = Math.round(event.pageX - $(this).offset().left);
+                                                   var art ="";
+                                                   var divWidth=document.getElementById('infBar').width;
+                                                   //Prozentuale Position des Pointers festhalten
+                                                   currentPointerPosition= parseInt((mausPositionX / $(this).width()) * 100);
+                                                   //Pointer auf angeklickte Stelle setzen
+                                                   setMarker(parseInt(((mausPositionX / $(this).width()) * 100)* videoLength / 100), art);
+                                               });
+                                               /**
+                                                * Klick auf preInformationsleiste
+                                                */
+                                               $('#preInfBar').dblclick(function (event, ui) {
+                                                   //Pointer auf angeklickte Stelle setzen
+                                                   setMarker(parseInt(0 * videoLength / 100), "");
+                                               });
+                                               /**
+                                                * Klick auf postInformationsleiste
+                                                */
+                                               $('#postInfBar').dblclick(function (event, ui) {
+                                                   //Pointer auf angeklickte Stelle setzen
+                                                   setMarker(parseInt(100 * videoLength / 100), "");
+                                               });
+                                           });
+                                       </script>
+                                       <table id="infBarDesignTable" cellspacing="0px" width="100%" margin="0px"
+                                              cellpadding="0" border-collapse="collapse" border-spacing="0">
+                                           <tr>
+                                               <td width="10px" padding="0px"><div id="preInfBar"></div></td>
+                                               <td padding="0px">
+                                                   <div id="infBar" class="BasisLeiste">
+                                                       <div id="Zeitpunktmarkierung"></div>
+                                                       <div id="InformationsObjekte"></div>
+                                                       <div id="KapitelMarkierungen">
+                                                       </div>
+                                                   </div>
+                                               </td>
+                                               <td width="10px" padding="0px"><div id="postInfBar"></div></td>
+                                           </tr>
+                                       </table>
+                                   </div>
+                                   </td>
+                               </tr>
+                               <tr>
+                                   <td>
+                                   <div class="relatedComments">
+                                       <div id ="relatedComments" >
+                                       </div>
+                                       <div class="newCommentArea" id="newCommentArea">
+                                            <textarea class="answer-textfield" id="newCommentTextField"></textarea>
+                                            <input type="button" value="Posten" onclick="writeComment(document.getElementById('newCommentTextField').value,currentPointerPosition)" style="width:14%; height: 30px" >
+                                       </div>
+                                   </div>
+                                   </td>
+                               </tr>
+                               <tr>
+                                   <td>
+                                       <div class="description" id="descriptionOutput">
+                                           <table class="descriptionTable" >
+                                               <tr id="videoInformation">
+                                                   <td>
+                                                       <div id="videoInformationOutput">
+                                                           <table width="100%" border="0" cellspacing="0">
+                                                               <tr>
+                                                                   <td>
+                                                                       <div>
+                                                                           <table width="100%" border="0" cellspacing="0">
+                                                                               <tr>
+                                                                                   <td>
+                                                                                       <div id="videoUploaderImage"></div>
+                                                                                   </td>
+                                                                                   <td>
+                                                                                       <div>
+                                                                                           <table width="100%" border="0" cellspacing="0">
+                                                                                               <tr>
+                                                                                                   <div id="uploaderUserName"></div>
+                                                                                               </tr>
+                                                                                               <tr>
+                                                                                                   <div id="videoUploadDate"></div>
+                                                                                               </tr>
+                                                                                               <tr>
+                                                                                                   <div id="videoDurationView"></div>
+                                                                                               </tr>
+                                                                                           </table>
+                                                                                       </div>
+                                                                                   </td>
+                                                                               </tr>
+                                                                           </table>
+                                                                       </div>
+                                                                   </td>
+                                                                   <td>
+                                                                       <table width="100%" border="0" cellspacing="0">
+                                                                           <tr>
+                                                                               <td>
+                                                                                   <div id="videoViews"></div>
+                                                                               </td>
+                                                                           </tr>
+                                                                           <tr>
+                                                                               <td>
+                                                                                   <table width="100%" border="0" cellspacing="0">
+                                                                                       <tr>
+                                                                                           <td width="30%">
+                                                                                               <img id="videoThumbUpPicture" src="img/thumbsUp-grey.png"
+                                                                                                    onmouseover="this.src='img/thumbsUp-black.png'"
+                                                                                                    onmouseout="this.src='img/thumbsUp-grey.png'"
+                                                                                                    onclick="setRating('like')" style="cursor: pointer;" width="20" height="20">
+                                                                                           </td>
+                                                                                           <td width="20%">
+                                                                                               <div id="videoLikes">
+                                                                                               </div>
+                                                                                           </td>
+                                                                                           <td width="30%">
+                                                                                               <img id="videoThumbDownPicture" src="img/thumbsDown-grey.png"
+                                                                                                    onmouseover="this.src='img/thumbsDown-black.png'"
+                                                                                                    onmouseout="this.src='img/thumbsDown-grey.png'"
+                                                                                                    onclick="setRating('dislike')" style="cursor: pointer;" width="20" height="20">
+                                                                                           </td>
+                                                                                           <td width="20%">
+                                                                                               <div id="videoDislikes">
+                                                                                               </div>
+                                                                                           </td>
+                                                                                       </tr>
+                                                                                   </table>
+                                                                               </td>
+                                                                           </tr>
+                                                                       </table>
+                                                                   </td>
+                                                               </tr>
+                                                           </table>
+                                                       </div>
+                                                   </td>
+                                               </tr>
+                                               <tr id="videoDescription">
+                                                   <td>
+                                                       <div id="videoDescriptionOutput">
+                                                       </div>
+                                                   </td>
+                                               </tr>
+                                               <tr id="descriptionExpandRow">
+                                                   <td>
+                                                       <div id="watch-description-expand" class="descriptionVisibilityToggle">
+                                                           <button class="description-toggle-button" type="button" id="description-expand-button"
+                                                                   href="javascript:void(0)" onClick="showVideoDescription()">
+                                                               <span class="description-toggle-span" id="description-expand-span">Videobeschreibung anzeigen</span>
+                                                           </button>
+                                                       </div>
+                                                   </td>
+                                               </tr>
+                                               <tr id="descriptionCollapseRow">
+                                                   <td>
+                                                       <div id="watch-description-collapse" class="descriptionVisibilityToggle">
+                                                           <button class="description-toggle-button" type="button" id="description-collapse-button"
+                                                                   href="javascript:void(0)" onClick="hideVideoDescription()">
+                                                               <span class="description-toggle-span" id="description-collapse-span">Videobeschreibung ausblenden</span>
+                                                           </button>
+                                                       </div>
+                                                   </td>
+                                               </tr>
+                                           </table>
+                                       </div>
+                                   </td>
+                               </tr>
+                               <tr>
+                                   <td>
+                                       <div class="generalComments" id="generalComments">
+                                       </div>
+                                   </td>
+                               </tr>
+                           </table>
+                       </div>
+                   </td>
+                   <td class="mainTableParts">
+                       <div class="rightframe">
+                           <table class="chapterAndRelatedTable">
+                               <tr class="chapterAndRelatedheadlineTables" id="chaptersHeadline">
+                                   <td>
+                                       <div class="chapterAndRelatedheadlines">Kapitelübersicht</div>
+                                   </td>
+                               </tr>
+                               <tr>
+                                   <td>
+                                       <div class="chapterView" id="chapterView"></div>
+                                   </td>
+                               </tr>
+                               <tr class="chapterAndRelatedheadlineTables" id="relatedVideoHeadline">
+                                   <td>
+                                       <div class="chapterAndRelatedheadlines">Weitere Videos zum Thema:</div>
+                                   </td>
+                               </tr>
+                               <tr>
+                                   <td>
+                                       <div class="relatedVideoView" id="relatedVideoView"></div>
+                                   </td>
+                               </tr>
+                           </table>
+                       </div>
+                   </td>
+               </tr>
+           </table>
+               <div id="impressum-div">
+                   <a href="impressum.html" style="float:left;" target="_blank">Impressum</a><a href="datenschutz.html" style="float:right;" target="_blank">Datenschutz</a>
+               </div>
+       </div>
+       </body>
+       </html>

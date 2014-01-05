@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>youtube client side</title>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+</head>
+<body>
+<input id="youtubeVideoId" type="text" maxlength="200" value="http://www.youtube.com/watch?v=a8TPXFoXO5A" style="width: 70%;"></input>
+<input id="clickMe" type="button" value="Get Comments" onclick="doFunction();" />
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script type="text/javascript">
+document.getElementById("clickMe").onclick = function () { 
+	var videoid = $('#youtubeVideoId').val();
+	var m;
+	if (m = videoid.match(/^http:\/\/www\.youtube\.com\/.*[?&]v=([^&]+)/i) || videoid.match(/^http:\/\/youtu\.be\/([^?]+)/i)) {
+		videoid = m[1];
+    }
+	 
+	var htmlString = "<ul>";
+	$.getJSON('https://gdata.youtube.com/feeds/api/videos/' + videoid + '/comments?alt=json', function(data) {
+		$.each(data.feed.entry, function(i, item) {					
+			var content = item['content']['$t'];
+			htmlString += '<li><p>' + content + '</p></li>';});
+            	$('#youtube').html(htmlString + "</ul>");
+    	}); 
+};
+</script>
+<div id="youtube"></div>
+</body>
+</html>

@@ -1,0 +1,168 @@
+/*
+ * Created by Dominik Rudisch on 25.11.13.
+ * Stylsheet enthält die Definitionen der Infaromationsleistenobjekte
+*/
+
+.BasisLeiste {
+
+}
+
+.BasisLeiste {
+    border-top: 1px solid rgb(170, 170, 170);
+    border-bottom: 1px solid rgb(170, 170, 170);
+    background: none repeat scroll 0% 0% rgb(255, 255, 255);
+    color: rgb(34, 34, 34);
+    font-family: Verdana,Arial,sans-serif;
+    font-size: 1.1em;
+    height: 0.9em;
+    position: relative;
+    text-align: left;
+    margin-top: 0.2em;
+    margin-bottom: 1em;
+}
+
+#Zeitpunktmarkierung {
+    z-index: 2;
+    border: none;
+    color: rgb(34, 34, 34);
+    font-family: Verdana,Arial,sans-serif;
+    font-size: 1.1em;
+    height: 0.9em;
+    position: relative;
+    text-align: left;
+    cursor: default;
+    background-color: darkred;
+    width: 0px;
+    opacity: 0.15;
+}
+
+#KapitelMarkierungen{
+    margin-left: 10px;
+}
+
+.Anhang, .Frage, .Kommentar, .Marker {
+    position: absolute;
+    z-index: 3;
+    width: 0.4em;
+    height: 0.9em;
+    top: 0.0em;
+    margin-left: -0.4em;
+    margin-left-value: -0.4em;
+    margin-left-ltr-source: physical;
+    margin-left-rtl-source: physical;
+    background-size: cover;
+    background-repeat: no-repeat;
+    cursor:pointer;
+
+    border-left: solid 1px #d3d3d3;
+    border-right: solid 1px #d3d3d3;
+}
+
+.Anhang {
+    background-image: url(../img/anhang.png);
+}
+
+.Frage {
+   background-color: darkred;
+
+}
+
+.Kommentar {
+    background-color: blue;
+}
+
+.Marker {
+    background-image: url(../img/marker.png);
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+}
+
+.Kapitel {
+    position: absolute;
+    z-index: 1;
+    width: 1px;
+    height: 1.0em;
+    cursor: default;
+    top: -0.05em;
+    background-color:rgb(170, 170, 170);
+}
+
+.relatedComments-Table {
+    width: 100%;
+    border-bottom: solid;
+    border-bottom-width: 1px;
+    border-bottom-color: white;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+}
+
+.newCommentArea {
+   overflow: auto;
+}
+
+.commenter-image-row {
+    vertical-align: top;
+    width: 50px;
+    padding-right: 10px;
+}
+
+.answer-button {
+    font: normal normal bold 11px/11px arial, sans-serif;
+    color: grey;
+    cursor: pointer;
+}
+.answer-hide-span {
+    font: normal normal bold 14px/14px arial, sans-serif;
+    color: grey;
+    cursor: pointer;
+    vertical-align: top;
+    float: right;
+}
+
+.answer-textfield-div {
+    visibility: hidden;
+    display: none;
+
+}
+
+.answer-textfield{
+    border: none;
+    resize: none;
+    overflow: hidden;
+    width:83%;
+    margin-right: 2%;
+    float:left;
+    background-color: white;
+    rows: 1;
+}
+.answer-textfield-coloumn {
+    background-color: #ffffff;
+    vertical-align: top;
+    width: 100%;
+}
+
+.answer-hide-coloumn{
+    float:right;
+    background-color: #ffffff;
+    width: 20px;
+}
+.answer-textfield-table {
+    width: 100%;
+    padding: 5px;
+    padding-left: 0px;
+}
+
+.answer-textfield-table-picture-column {
+    width: 50px;
+    vertical-align: top;
+}
+
+.comment-replies-div {
+    width: 100%;
+}
+
+.comment-right-frame {
+    min-height: 50px;
+}

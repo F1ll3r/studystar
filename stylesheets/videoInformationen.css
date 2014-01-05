@@ -1,0 +1,30 @@
+
+#videoViews {
+
+}
+
+#videoViews {
+    text-align: right;
+    font: normal normal bold 22px/22px arial, sans-serif;
+    padding-right: 5px;
+    vertical-align: top;
+}
+
+#videoThumbUpPicture {
+    float: right;
+}
+
+#videoThumbDownPicture {
+    float: right;
+
+}
+
+#uploaderUserName {
+    font: bold 13px/15px arial,sans-serif;
+}
+
+#videoUploadDate, #videoDurationView  {
+    font: bold 11px/15px arial,sans-serif;
+    color: rgb(153, 153, 153);
+}
+
