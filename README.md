@@ -8,9 +8,9 @@ at University Heilbronn (Software Engineering)
 
 Author:
 
-Dominik Rudisch
-Selma Ulusoy
-Vicdan Burna
+Dominik Rudisch,
+Selma Ulusoy,
+Vicdan Burna,
 Fabian Wiedenhöfer
 
 
