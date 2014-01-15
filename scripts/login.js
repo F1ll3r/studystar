@@ -4,7 +4,9 @@
 
 var OAUTHURL    =   'https://accounts.google.com/o/oauth2/auth?';
 var VALIDURL    =   'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=';
-var SCOPE       =   'https://www.googleapis.com/auth/userinfo.profile + http://gdata.youtube.com';
+var DRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.readonly + https://www.googleapis.com/auth/drive + https://www.googleapis.com/auth/drive.file ' +
+    ' + https://www.googleapis.com/auth/drive.metadata.readonly + https://www.googleapis.com/auth/drive.appdata + https://www.googleapis.com/auth/drive.apps.readonly';
+var SCOPE       =   'https://www.googleapis.com/auth/userinfo.profile + http://gdata.youtube.com + ' + DRIVE_SCOPES;
 var CLIENTID    =   '296855025663-t26p7m8d4vmpt03377gsfptql8q83297.apps.googleusercontent.com';
 //var REDIRECT    =   'http://studystar.se.hs-heilbronn.de/watch.html'
 var REDIRECT    =   'http://localhost:63342/seb-labsw-13-ws-tankstar/watch.html'
@@ -12,17 +14,22 @@ var REDIRECT    =   'http://localhost:63342/seb-labsw-13-ws-tankstar/watch.html'
 var TYPE        =   'token';
 var _url        =   OAUTHURL + 'scope=' + SCOPE + '&client_id=' + CLIENTID + '&redirect_uri=' + REDIRECT + '&response_type=' + TYPE;
 
-var isLoggedIn  = false;
-
 function checkLogin() {
     if(sessionStorage.getItem('accessToken')) {
         $('#loginButton').hide();
         $('#logoutButton').show();
+        $('#notesOverviewLink').show();
+        if (document.getElementById('notesOverviewLink')) {
+            document.getElementById('notesOverviewLink').style.visibility="visible";
+        }
         accessToken = sessionStorage.getItem('accessToken');
         isLoggedIn = true;
     } else {
         $('#loginButton').show();
         $('#logoutButton').hide();
+        if (document.getElementById('notesOverviewLink')) {
+            document.getElementById('notesOverviewLink').style.visibility="collapse";
+        }
         accessToken = "";
         isLoggedIn = false;
     }
@@ -116,9 +123,16 @@ function logout() {
  */
 function getUserInfo() {
     if(isLoggedIn){
+        //Private Studystar Notizdatei suchen und ggf neu erstellen
+        findStudystarPrivateNoteFile();
+
         $.ajax({
             url: 'https://www.googleapis.com/oauth2/v1/userinfo?access_token=' + accessToken,
             data: null,
+            error: function(resp) {
+                console.log(resp);
+                console.log("could not get user data");
+            },
             success: function(resp) {
                 user    =   resp;
                 console.log(user);

@@ -5,70 +5,55 @@
     <title>studystar</title>
 
     <link rel="stylesheet" type="text/css" href="stylesheets/watch.css">
-    <link rel="stylesheet" type="text/css" href="stylesheets/informationsLeiste.css">
-    <link rel="stylesheet" type="text/css" href="stylesheets/videoInformationen.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/loading.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/informationBar.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/videoInformation.css">
 
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js" type="text/javascript"></script>
     <script src="//www.google.com/jsapi" type="text/javascript"></script>
 
-    <script type="text/javascript" src="scripts/formatierer.js"></script>
-    <script type="text/javascript" src="scripts/parameterErkennung.js"></script>
+    <script type="text/javascript" src="scripts/globalVariables.js"></script>
+    <script type="text/javascript" src="scripts/loading.js"></script>
+    <script type="text/javascript" src="scripts/formatters.js"></script>
+    <script type="text/javascript" src="scripts/urlParser.js"></script>
     <script type="text/javascript">
-        //Browser API Key
-        var SERVER_API_KEY = "AIzaSyCHBE8yE_5M_xFj9fP5aZCEL1WIn5TFMBE";
-
-        //Variable hält die Informationen des derzeig eingeloggten Google+ Benutzers
-        var currentUser;
-
-        //Videoparameter erkennen
-        var key = 'v';
-        var videoID = getParameter(key);
-
-        //Videolänge global deklarieren (wird beim erhalten der videoinformationen auf korekten wert gesetzt
-        var videoLength = 1;
-
-        var isLoggedIn = false;
-
-        var accessToken;
-
-        //Array das die Objekte der Informationsleiste beinhaltet
-        var infObjects = [];
-
-        //Array das alle unzuordenbare Kommentare beinhaltet
-        var generalCommentObjects = [];
-
-        //Position des Pointers auf der Inormationsleiste
-        var currentPointerPosition = 0;
-
-        //Gecachte Position des Pointers auf der Inormationsleiste
-        var cashedPointerPosition = 0;
-
-        //Gecachten Kommentarinhalt für Hover Vorschaufunktion
-        var commentPreviewCache = "";
-
-        //Vorschaumodus
-        var previewMode = false;
-
+        //Video ID anhand des URL-Parameters erkennen
+        videoID = getParameter(key);
+        //Startabspielzeitpunkt über URL-Parameter erkennen
+        startPlaytime = getParameter(startPlaytimeKey);
     </script>
-
     <script src="scripts/youtubePlayer.js" type="text/javascript"></script>
     <script type="text/javascript">
         //Laden des Players
         google.load("swfobject", "2.1");
-
     </script>
 
-    <script src="scripts/LinkErkennung.js" type="text/javascript"></script>
-
-    <script type="text/javascript" src="scripts/informationsleiste.js"></script>
-    <script type="text/javascript" src="scripts/videoInformationenUndKapitel.js"></script>
+    <script src="scripts/deeplinkAndHyperlinkParser.js" type="text/javascript"></script>
+    <script type="text/javascript" src="scripts/informationBar.js"></script>
+    <script type="text/javascript" src="scripts/videoInformationAndChapters.js"></script>
     <script type="text/javascript" src="scripts/comments.js"></script>
     <script type="text/javascript" src="scripts/login.js"></script>
+    <script type="text/javascript" src="scripts/privateNotes.js"></script>
     <script type="text/javascript" src="scripts/autogrowTextarea.js"></script>
     <script type="text/javascript" src="scripts/googleAnalytics.js"></script>
 
 </head>
 <body>
+
+<div class="popup__overlay">
+    <div class="popup">
+        <div id="floatingCirclesG">
+            <div class="f_circleG" id="frotateG_01"></div>
+            <div class="f_circleG" id="frotateG_02"></div>
+            <div class="f_circleG" id="frotateG_03"></div>
+            <div class="f_circleG" id="frotateG_04"></div>
+            <div class="f_circleG" id="frotateG_05"></div>
+            <div class="f_circleG" id="frotateG_06"></div>
+            <div class="f_circleG" id="frotateG_07"></div>
+            <div class="f_circleG" id="frotateG_08"></div>
+        </div>
+    </div>
+</div>
 
 <div class="pagehead">
     <span id="studystarLogo">
@@ -79,9 +64,45 @@
                     <img src="img/logo-hhn-small.png" alt="HHN" id="hhnLogo-banner" height="30px"
                          onclick="location.href='http://www.hs-heilbronn.de/seb';return false;" target="_blank" style="cursor: pointer;">
     </span>
+
     <span class="title" id="title"></span>
 
+    <span id="searchBar">
+            <input  type="text" id="searchField" style="display: none" align="right" >
+            <img src="img/search.png" alt="Suchen" id="searchBtn" height="30px"
+             onclick="callSearch();" style="cursor: pointer; vertical-align: middle" >
+        <script>
+            function callSearch() {
+                var spoiler = document.getElementById('searchField');
+                if (spoiler.style.display == 'inline') {
+                    makeURL();
+                    return;
+                } else {
+                    spoiler.style.display = 'inline';
+                }
+                document.getElementById("searchField").innerHTML = spoiler.innerHTML;
+
+                return false;
+            }
+
+            function makeURL() {
+                var term = "search.html?suche="+document.getElementById('searchField').value;
+                location.href = term;
+            }
+
+            $("#searchField").keyup(function(event){
+                if(event.keyCode == 13){
+                    makeURL();
+                }
+            });
+        </script>
+     </span>
+
     <span id="studystarUser">
+            <span id="notesOverviewSpan">
+                <img name="notesOverviewLink" type="image" id="notesOverviewLink" src="img/noteIcon.png" alt="Benutzer abmelden"
+                     class="googleLogout" value="Meine Notizen" onclick="location.href='notesOverview.html';return false;" target="_self" style="cursor: pointer;">
+            </span>
             <span id="userName"></span>
             <span id="userPicture"></span>
         <img name="Logout" type="image" id="logoutButton" src="img/logout.png" alt="Benutzer abmelden"
@@ -93,7 +114,9 @@
 
 
     <script>
+        //Login prüfen
         checkLogin();
+       // getAllComments(videoID);
     </script>
 
 </div>
@@ -116,9 +139,7 @@
 
                                        <script>
                                            $(document).ready(function () {
-
-
-                                               //Textfield die Autogrow Eigenschaft zuweisen
+                                              //Textfield die Autogrow Eigenschaft zuweisen
                                                $('#newCommentTextField').autogrow();
 
                                                //Automatischer aufruf jede Sekunde
@@ -162,7 +183,7 @@
                                                    //Prozentuale Position des Pointers festhalten
                                                    currentPointerPosition= parseInt((mausPositionX / $(this).width()) * 100);
                                                    //Pointer auf angeklickte Stelle setzen
-                                                   setMarker(parseInt(((mausPositionX / $(this).width()) * 100)* videoLength / 100), art);
+                                                   onDoubleClickInformationBar(parseInt(((mausPositionX / $(this).width()) * 100)* videoLength / 100), art);
                                                });
                                                /**
                                                 * Klick auf preInformationsleiste
@@ -170,6 +191,8 @@
                                                $('#preInfBar').dblclick(function (event, ui) {
                                                    //Pointer auf angeklickte Stelle setzen
                                                    setMarker(parseInt(0 * videoLength / 100), "");
+
+                                                   onDoubleClickInformationBar(parseInt(((mausPositionX / $(this).width()) * 100)* videoLength / 100), art);
                                                });
                                                /**
                                                 * Klick auf postInformationsleiste
@@ -177,6 +200,8 @@
                                                $('#postInfBar').dblclick(function (event, ui) {
                                                    //Pointer auf angeklickte Stelle setzen
                                                    setMarker(parseInt(100 * videoLength / 100), "");
+
+                                                   onDoubleClickInformationBar(parseInt(100 * videoLength / 100), "");
                                                });
                                            });
                                        </script>
@@ -205,7 +230,8 @@
                                        </div>
                                        <div class="newCommentArea" id="newCommentArea">
                                             <textarea class="answer-textfield" id="newCommentTextField"></textarea>
-                                            <input type="button" value="Posten" onclick="writeComment(document.getElementById('newCommentTextField').value,currentPointerPosition)" style="width:14%; height: 30px" >
+                                            <input type="button" value="Posten" class="buttons" id="newPostButton" class="buttons" onclick="writeComment(document.getElementById('newCommentTextField').value,currentPointerPosition)" >
+                                            <input type="button" value="Notiz" class="buttons" id="newNoteButton" class="buttons" onclick="createNewPrivateNote(videoID, formatPercentageToTimestamp(currentPointerPosition) + ' ' + document.getElementById('newCommentTextField').value)" >
                                        </div>
                                    </div>
                                    </td>

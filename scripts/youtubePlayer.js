@@ -18,7 +18,7 @@ function onPlayerError(errorCode) {
 function updatePlayerInfo() {
 
     if (ytplayer.getPlayerState()== 1){
-        showCurrentTimeOnInformationBar (ytplayer.getCurrentTime());
+        showCurrentTimeOnInformationBar(ytplayer.getCurrentTime());
     }
 }
 
@@ -45,7 +45,7 @@ function setNewVideo() {
  */
 function setVideoTime(time) {
     //Wenn das Video noch nicht gestartet ist, starte es
-    if(ytPlayer.getPlayerState()== -1) {
+    if(ytplayer.getPlayerState()== -1) {
         ytplayer.playVideo();
         setTimeout(function () {
             if(ytplayer) {
@@ -82,6 +82,16 @@ function onYouTubePlayerReady(playerId) {
     //Veranlasse das Laden von allen Kommentaren sobald der Videoplayer bereit und die Videolänge bekannt ist
     getAllComments(videoID);
 
+    //Wenn ein Startabspielparameter definiert ist dann spiele Video direkt zu diesem Zeitabschnitt ab
+    if(startPlaytime) {
+        ytplayer.playVideo();
+        setTimeout(function () {
+            if(parseInt(ytplayer.getDuration())>0) {
+                setVideoTime(startPlaytime);
+            }
+        }, 500);
+    }
+
 }
 
 // Läuft wenn es ausgeführt wird
@@ -100,6 +110,7 @@ function loadPlayer() {
 
     //Code um Player mit Schaltflächen einzubinden
     var playerStr = "http://www.youtube.com/v/"+videoID +"?enablejsapi=1&playerapiid=player1&version=3&fs=1&autohide=1";
+
     swfobject.embedSWF(playerStr,
         "videoDiv", "100%", "500", "8", null, null, params, atts);
 

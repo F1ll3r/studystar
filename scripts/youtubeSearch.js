@@ -143,7 +143,6 @@ var youtubeSearch = {
                 //Videoelemente
                 var entry = json.data.items[i];
 
-               //alert(entry.toSource());
 
                 if (entry.video) {
                     //add tags on the bottom

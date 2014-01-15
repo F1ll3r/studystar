@@ -72,6 +72,7 @@ a {
     line-height: 40px;
     display: inline-block;
     margin-top: -45px;
+    margin-left: 5px;
     font: normal normal normal 16px/16px arial, sans-serif;
 }
 
@@ -90,11 +91,13 @@ a {
 
 .centerframe {
     min-width: 600px;
+    max-width: 717px;
 }
 
 .centerframeTable {
     margin-right: 0px;
     width: 100%;
+    max-width: 717px;
 }
 
 
@@ -141,7 +144,7 @@ a {
 }
 
 #videoInformation {
-    fgont: normal normal normal 13px/15px arial, sans-serif;
+    font: normal normal normal 13px/15px arial, sans-serif;
     outline: rgb(51, 51, 51) none 0px;
     text-decoration: none solid rgb(51, 51, 51);
     unicode-bidi: embed;
@@ -176,20 +179,6 @@ a {
     unicode-bidi: embed;
 }
 
-.answer-button {
-    font: normal normal normal 13px/15px arial, sans-serif;
-    outline: rgb(51, 51, 51) none 0px;
-    text-decoration: none solid rgb(51, 51, 51);
-    unicode-bidi: embed;
-}
-
-.answer-textfield {
-    ffont: normal normal normal 13px/15px arial, sans-serif;
-    outline: rgb(51, 51, 51) none 0px;
-    text-decoration: none solid rgb(51, 51, 51);
-    unicode-bidi: embed;
-}
-
 .answer-textfield-table {
     font: normal normal normal 13px/15px arial, sans-serif;
     outline: rgb(51, 51, 51) none 0px;
@@ -217,7 +206,6 @@ a {
 .commentPointer {
     font: normal normal normal 14px/normal arial, sans-serif;
     margin-left: -18px;
-    margin-left-value: -18px;
     content: '';
     position: absolute;
     border-style: solid;
@@ -235,6 +223,10 @@ a {
     border: 1px solid lightgray;
     max-width: 1200px;
     word-break: break-all;
+}
+
+.generalCommentsTable{
+   width: 100%;
 }
 
 .rightframe {
@@ -268,6 +260,7 @@ a {
 
 .mainTableParts {
     vertical-align: top;
+    max-width: 717px;
 }
 
 /* Bereich der die Darstellung der aus- und einblendenden Beschreibung definiert*/
@@ -337,7 +330,6 @@ a {
     margin: 0px;
     padding: 0px;
     position: relative;
-    webkit-padding-start: 0px;
 }
 
 .related-video-item, .chapter-item {
@@ -506,6 +498,20 @@ a {
     cursor: pointer;
     margin-top: 10px;
 
+}
+
+#notesOverviewLink {
+    width: 30px;
+    height: 30px;
+    visibility: collapse;
+}
+
+#notesOverviewSpan {
+    vertical-align: middle;
+    line-height: 40px;
+    display: inline-block;
+    margin-top: -45px;
+    font: normal normal normal 16px/16px arial, sans-serif;
 }
 
 .banner-img {
