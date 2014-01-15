@@ -4,16 +4,13 @@
 
 function getComments(commentURL) {
     $.getJSON(commentURL, function(data) {
-        var nextLink;
-
         $.each(data.feed.entry, function(i, item) {
             var content = item['content']['$t'];
             if (getDeeplinksInText(content)!= '') {
+                //Add application specific infos
                 item["deeplinks"] = getDeeplinksInText(item.content.$t);
 
                 item["commentType"] = "Frage";
-
-                var infObjects2 = [];
 
                 //Writes the comment object into a Globalarray
                 infObjects.push(item);
@@ -27,6 +24,7 @@ function getComments(commentURL) {
                 showGeneralCommentsObjects();
             }
         });
+        //Calls recusivly the next 50 Comments, because that's the maximum googleAPI delivers in one Query
         $.each(data.feed.link, function(i, link) {
             if(link['rel'] == 'next') {
                 commentFeedURL = link['href'];
@@ -37,37 +35,9 @@ function getComments(commentURL) {
 }
 
 function getAllComments (videoid) {
-
     var commentFeedURL = 'https://gdata.youtube.com/feeds/api/videos/' + videoid + '/comments?alt=json&max-results=50'
-
-    $.getJSON(commentFeedURL, function(data) {
-        var nextLink;
-        $.each(data.feed.entry, function(i, item) {
-            var content = item['content']['$t'];
-
-            if (getDeeplinksInText(content)!= '') {
-                item["deeplinks"] = getDeeplinksInText(item.content.$t);
-
-                item["commentType"] = "Frage";
-                var infObjects2 = [];
-                //Writes the comment object into a Globalarray
-                infObjects.push(item);
-                setInformationObjectOnBar(item);
-            }
-            else {
-                //Zum globalen Array hinzufügen
-                generalCommentObjects.push(item);
-                //Kommentare ohne Deeplink in der Zeitleiste anzeigen
-                showGeneralCommentsObjects();
-            }
-        });
-        $.each(data.feed.link, function(i, link) {
-            if(link['rel'] == 'next') {
-                nextLink = link['href'];
-                getComments(commentFeedURL);
-            }
-        });
-    });
+    //Calls the recursiv getCommentsMethod
+    getComments(commentFeedURL);
 }
 function writeComment (commentText, onPercentage) {
     //Prüfen ob ein Benutzer eingeloggt ist
@@ -144,43 +114,6 @@ function writeComment (commentText, onPercentage) {
     }
 }
 
-function deleteComment (commentText) {
-    alert("delete");
-    if (isLoggedIn ) {
-        if(commentText != "") {
-            var infObj = generateInformationObject(commentText);
-            if(currentUser.id.isEqual(infObj.yt$googlePlusUserId)) {
-
-                var xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                    "<entry xmlns=\"http://www.w3.org/2005/Atom\" xmlns:yt=\"http://gdata.youtube.com/schemas/2007>\">"+
-                    "<content>"  +  commentText + "</content>" +
-                    "</entry>";
-                $.ajax({
-                    type: 'DELETE',
-                    url: "https://gdata.youtube.com/feeds/api/videos/"+ videoID + '/comments',
-                    data: xmlString,
-
-                    dataType: 'application/atom+xml',
-                    beforeSend: function(xhr){
-                        xhr.setRequestHeader('Content-type', 'application/atom+xml; charset=UTF-8');
-                        xhr.setRequestHeader('Authorization', 'AuthSub token="' + accessToken + '"');
-                        xhr.setRequestHeader('X-GData-Key', 'key="' + 'AIzaSyBt0t0JJU1c9WQBMHwKNNg9g3M0hGFuQqQ' + '"');
-                        xhr.setRequestHeader('GData-Version', 2);
-                    },
-                    scope: 'https://gdata.youtube.com',
-                    error: function(data, textStatus, errorThrown) {
-
-                        //Wenn Kommentar gelöscht werden konnte, aktualisieren alle Kommentare
-                        if (data.statusText == "Deleted") {
-                                $('#generalComments').html("");
-                                showGeneralCommentsObjects();
-                            }
-                        }
-                });
-            }
-        }
-        }
-   }
     /**
  * Genieriert ein neues Informationsobjekt anhand des aktuell eingeloggten Benutzers und eines Kommentartexts
  * @param commentText Kommentartext

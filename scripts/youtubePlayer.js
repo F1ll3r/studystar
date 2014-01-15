@@ -61,7 +61,7 @@ function setVideoTime(time) {
             if(time < duration) {
                 ytplayer.seekTo(time, true);
             } else {
-                alert("Anggebene Zeitstelle ist länger als das Video!");
+                alert("Angegebene Zeitstelle ist länger als das Video!");
             }
         }
     }

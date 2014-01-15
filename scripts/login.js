@@ -1,5 +1,8 @@
 /**
  * Created by Fabian Wiedenhoefer on 05.12.13.
+ * Inspired by
+ * http://www.gethugames.in/blog/2012/04/authentication-and-authorization-for-google-apis-in-javascript-popup-window-tutorial.html
+ * code licensed under GPL
  */
 
 var OAUTHURL    =   'https://accounts.google.com/o/oauth2/auth?';
@@ -8,12 +11,15 @@ var DRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.readonly + https://www
     ' + https://www.googleapis.com/auth/drive.metadata.readonly + https://www.googleapis.com/auth/drive.appdata + https://www.googleapis.com/auth/drive.apps.readonly';
 var SCOPE       =   'https://www.googleapis.com/auth/userinfo.profile + http://gdata.youtube.com + ' + DRIVE_SCOPES;
 var CLIENTID    =   '296855025663-t26p7m8d4vmpt03377gsfptql8q83297.apps.googleusercontent.com';
-//var REDIRECT    =   'http://studystar.se.hs-heilbronn.de/watch.html'
-var REDIRECT    =   'http://localhost:63342/seb-labsw-13-ws-tankstar/watch.html'
+var REDIRECT    =   'http://studystar.se.hs-heilbronn.de/watch.html';
+//var REDIRECT    =   'http://localhost:63342/seb-labsw-13-ws-tankstar/watch.html'
 
 var TYPE        =   'token';
 var _url        =   OAUTHURL + 'scope=' + SCOPE + '&client_id=' + CLIENTID + '&redirect_uri=' + REDIRECT + '&response_type=' + TYPE;
 
+/**
+ * check if login was successful
+ */
 function checkLogin() {
     if(sessionStorage.getItem('accessToken')) {
         $('#loginButton').hide();
@@ -24,6 +30,7 @@ function checkLogin() {
         }
         accessToken = sessionStorage.getItem('accessToken');
         isLoggedIn = true;
+
     } else {
         $('#loginButton').show();
         $('#logoutButton').hide();
@@ -35,7 +42,9 @@ function checkLogin() {
     }
     getUserInfo();
 }
-
+/**
+ * Login for the user account
+ */
 function login() {
         var win         =   window.open(_url, "windowname1", 'width=800, height=600', "scrollbars=auto");
 
@@ -47,8 +56,8 @@ function login() {
                     var url =   win.document.URL;
                     accessToken =   gup(url, 'access_token');
                     console.log(accessToken);
-                    tokenType = gup(url, 'token_type');
-                    expiresIn = gup(url, 'expires_in');
+                    var tokenType = gup(url, 'token_type');
+                    var expiresIn = gup(url, 'expires_in');
                     win.close();
                     validateToken(accessToken);
                 }
@@ -57,7 +66,10 @@ function login() {
         }, 100);
 
 }
-
+/**
+ * Validates the token
+ * @param token
+ */
 function validateToken(token) {
     $.ajax({
         url: VALIDURL + token,
@@ -74,7 +86,7 @@ function validateToken(token) {
 }
 
 /**
- * Funktion zum auslesen des AccessToken
+ * reads the accesstoken parameter from the url
  * Quelle: http://www.netlobo.com/url_query_string_javascript.html
  */
 function gup(url, name) {
@@ -89,33 +101,12 @@ function gup(url, name) {
 }
 
 /**
- * Funktion zum Ausloggen des Benutzers
+ * logout of the user
  */
 function logout() {
     // Revoke the accesstoken of this session.
     sessionStorage.removeItem('accessToken');
     checkLogin();
-
-    /*
-    $.ajax({
-        type: 'GET',
-        url: 'https://accounts.google.com/o/oauth2/revoke?token=' +
-            accessToken,
-        async: false,
-        contentType: 'application/json',
-        dataType: 'jsonp',
-        success: function(result) {
-            console.log('revoke response: ' + result);
-            //Gespeicherter Access Token aus session Storage entfernen
-            sessionStorage.removeItem('accessToken');
-            //Login Button wieder anzeigen etc.
-            checkLogin();
-        },
-        error: function(e) {
-            console.log(e);
-        }
-    });
-    */
 }
 
 /**
@@ -138,7 +129,7 @@ function getUserInfo() {
                 console.log(user);
 
                 //Write user info's to global variable
-                currentUser = user
+                currentUser = user;
                 document.getElementById("userName").innerHTML = user.name;
                 //Set user picture
                 $('#userPicture').html('<img src="https://plus.google.com/s2/photos/profile/'+ user.id +'" height="50px" width="50px" alt="Image not found"'
@@ -154,7 +145,4 @@ function getUserInfo() {
     }
 }
 
-function refreshToken() {
-
-}
 
